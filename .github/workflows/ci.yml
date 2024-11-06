@@ -1,26 +1,56 @@
-# .github/workflows/ci.yml
-name: CI
+name: CI/CD Pipeline
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2 # Step to check out the code
+      - name: Checkout code
+        uses: actions/checkout@v2
+
       - name: Set up Python
-        uses: actions/setup-python@v2 # Step to set up Python on Window
+        uses: actions/setup-python@v2
         with:
           python-version: "3.10.11"
 
-      - name: Install dependencies # Install dependencies
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install Flask flake8 pytest
+          pip install -r requirements.txt
 
-      - name: Lint with Flake8
-        run: flake8 app.py
+      - name: Run tests
+        run: |
+          # You can use pytest or any other testing framework
+          pytest
 
-      - name: Run unit tests
-        run: python test_app.py
+  deploy:
+    runs-on: windows-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' # Deploy only from the main branch
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Deploy to Windows Server
+        run: |
+          echo "Deploying to the Windows server..."
+          # Replace the following command with your deployment script
+          # Example: Using PowerShell to invoke a deployment script
+          $session = New-PSSession -ComputerName your_server -Credential (Get-Credential)
+          Invoke-Command -Session $session -ScriptBlock {
+            cd "C:\path\to\your\app"
+            git pull
+            # Optionally restart your Flask service or application
+            Stop-Service -Name "your_flask_service" -Force
+            Start-Service -Name "your_flask_service"
+          }
+          Remove-PSSession -Session $session
