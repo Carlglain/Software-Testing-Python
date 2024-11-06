@@ -2,14 +2,13 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [main] 
+    branches: [main]
   pull_request:
     branches: [main]
-      
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout code
@@ -18,7 +17,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.8" # Specify the Python version you need
+          python-version: "3.10.11" # Specify the Python version you need
 
       - name: Install dependencies
         run: |
@@ -27,5 +26,4 @@ jobs:
 
       - name: Run tests
         run: |
-          # You can use pytest or any other testing framework
           pytest
